@@ -56,6 +56,11 @@ class Asteroid:
 class Sound:
     
     def __init__(self):
+        """
+        
+        
+        
+        """
         self.move_sound = pygame.mixer.Sound("")
         self.collision_sound = pygame.mixer.Sound("")
         self.game_over_sound = pygame.mixer.Sound("")
