@@ -1,7 +1,7 @@
 import pygame
 
-from model import Ship, Asteroid, Sound
-from view import *
+import model
+import view
 
 pygame.init()
 
@@ -9,7 +9,6 @@ class Controller:
     def __init__(self, model):
         self.model = model
         self.gamestate = "menu"
-
 
     # def menuloop(self):
     #     menu_options = ["Play", "Settings", "Quit"]
@@ -62,8 +61,6 @@ class Controller:
                         elif menu_options[curr_option] == "Quit":
                             self.gamestate = "quit"
 
-
-
     # def settingsloop(self):
     #     settings_options = ["SFX", "Music", "Back"]
     #     curr_option = 0
@@ -112,7 +109,6 @@ class Controller:
                         elif settings_options[curr_option] == "Back":
                             self.gamestate = "menu"
 
-
     # def gameloop(self):
     #     game_running = True
     #     menu_running = False
@@ -159,8 +155,6 @@ class Controller:
             for
             next loop
             """
-
-
     # def game_over_loop():
     #     game_over_running = True
     #     menu_running = False
@@ -230,5 +224,6 @@ class Controller:
             else:
                 running = False
 
-            # pygame.display.flip()
+            pygame.display.flip()
+        
         pygame.quit()
