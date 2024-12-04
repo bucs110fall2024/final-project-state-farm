@@ -1,17 +1,33 @@
 import pygame
 
-from model import Ship, Asteroid, Sound, GameState
+from src.model import Game, Ship, Asteroid, Sound, Timer, Menu, Cursor, SCR_WIDTH, SCR_HEIGHT
 
 class Controller:
-    def __init__(self, model):
-        pygame.init()
-        self.model = model
-        self.gamestate = GameState()
-        scr_width = 1000
-        scr_length = 600
-        self.screen = pygame.display.set_mode((scr_width, scr_length))
-        pygame.display.set_caption("Jake Edelstein CS110 Final Project - Asteroid Dodging Game")
+    def __init__(self):
+        self.game = Game()
+        self.menu = Menu(self.game)
+        ship_sprite = Ship((SCR_WIDTH / 2, SCR_HEIGHT - 50))
+        self.ship = pygame.sprite.GroupSingle(ship_sprite)
 
+    # def check_events(self):
+    #     """
+    #     Runs a check for all events relevant to the Controller class.
+    #     args: None
+    #     return: None
+    #     """
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             self.gamestate = "quit"
+    #         if event.type == pygame.KEYDOWN:
+    #             if event.type == pygame.K_UP:
+    #                 self.UP = True
+    #             if event.type == pygame.K_DOWN:
+    #                 self.DOWN = True
+    #             if event.type == pygame.K_RETURN:
+    #                 self.RETURN = True
+    #             if event.type == pygame.K_ESCAPE:
+    #                 self.ESCAPE = True
+        
     # def menuloop(self):
     #     menu_options = ["Play", "Settings", "Quit"]
     #     curr_option = 0
@@ -41,26 +57,26 @@ class Controller:
     #                         menu_running = False
 
     def menuloop(self):
+        self.menu = Menu(self.game)
         menu_options = ["Play", "Settings", "Quit"]
-        curr_option = 0
-
-        while(self.gamestate.state == "menu"):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.gamestate = "quit"
-
-                if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.K_UP:
-                        curr_option = (curr_option - 1) % len(menu_options)
-                    elif event.type == pygame.K_DOWN:
-                        curr_option = (curr_option + 1) % len(menu_options)
-                    elif event.type == pygame.K_RETURN:
-                        if menu_options[curr_option] == "Play":
-                            self.gamestate.state = "game"
-                        elif menu_options[curr_option] == "Settings":
-                            self.gamestate.state = "settings"
-                        elif menu_options[curr_option] == "Quit":
-                            self.gamestate.state = "quit"
+        self.menu.set_options(menu_options)
+        
+        while(self.game.state == "menu"):
+            self.game.check_events()
+            # if self.game.UP:
+            #     curr_option = (curr_option - 1) % len(menu_options)
+            # elif self.game.DOWN:
+            #     curr_option = (curr_option + 1) % len(menu_options)
+            self.menu.move_cursor()
+            
+            if self.game.RETURN:
+                if menu_options[self.menu.curr_option] == "Play":
+                    self.game.state = "game"
+                elif menu_options[self.menu.curr_option] == "Settings":
+                    self.game.state = "settings"
+                elif menu_options[self.menu.curr_option] == "Quit":
+                    self.game.state = "quit"
+            
 
     # def settingsloop(self):
     #     settings_options = ["SFX", "Music", "Back"]
@@ -89,26 +105,25 @@ class Controller:
     #                         menu_running = True
 
     def settingsloop(self):
+        menu = Menu(self.game)
         settings_options = ["SFX", "Music", "Back"]
-        curr_option = 0
+        menu.set_options(settings_options)
 
-        while(self.gamestate.state == "settings"):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.gamestate = "quit"
+        while(self.game.state == "settings"):
+            self.game.check_events()
+            # if self.game.UP:
+            #     curr_option = (curr_option - 1) % len(settings_options)
+            # elif self.game.DOWN:
+            #     curr_option = (curr_option + 1) % len(settings_options)
+            menu.move_cursor()
 
-                if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.K_UP:
-                        curr_option = (curr_option - 1) % len(settings_options)
-                    elif event.type == pygame.K_DOWN:
-                        curr_option = (curr_option + 1) % len(settings_options)
-                    elif event.type == pygame.K_RETURN:
-                        if settings_options[curr_option] == "SFX":
-                            Sound.toggle_sfx()
-                        elif settings_options[curr_option] == "Music":
-                            Sound.toggle_music()
-                        elif settings_options[curr_option] == "Back":
-                            self.gamestate.state = "menu"
+            if self.game.RETURN:
+                if settings_options[menu.curr_option] == "SFX":
+                    Sound.toggle_sfx()
+                elif settings_options[menu.curr_option] == "Music":
+                    Sound.toggle_music()
+                elif settings_options[menu.curr_option] == "Back":
+                    self.game.state = "menu"
 
     # def gameloop(self):
     #     game_running = True
@@ -136,20 +151,53 @@ class Controller:
     #         next loop
     #         """
 
+    def pauseloop(self):
+        pause_options = ["Resume", "Settings", "End Game", "Quit"]
+        curr_option = 0
+        
+        self.game.check_events()
+        if self.game.UP:
+            curr_option = (curr_option - 1) % len(pause_options)
+        elif self.game.DOWN:
+            curr_option = (curr_option + 1) % len(pause_options)
+        elif self.game.RETURN:
+            if pause_options[curr_option] == "Resume":
+                self.game.state = "game"
+            elif pause_options[curr_option] == "Settings":
+                self.game.state = "settings"
+            elif pause_options[curr_option] == "End Game":
+                self.game.state = "game over"
+            elif pause_options[curr_option] == "Quit":
+                self.game.state = "quit"
+
     def gameloop(self):
-        while(self.gamestate.state == "game"):
+        self.game.check_events()
+        while(self.game.state == "game"):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.gamestate.state = "quit"
+                    self.game.state = "quit"
                 elif event.type == pygame.K_ESCAPE:
-                    self.gamestate.state = "menu"
+                    self.game.state = "pause"
             
+            clock = pygame.time.Clock()
+            self.game.screen.fill("black")
+            self.ship.update()
+            self.ship.draw(self.game.screen)
+            timer_center_pos = (90, 20)
+            self.game.draw_text(self.game.time.get_str(), 15, (timer_center_pos))
+            
+            self.game.update()
+            
+            pygame.display.flip()
+            clock.tick(320)
             """
             stuff
             the code
             do
             """
+            self.game.screen.fill("black")
             pygame.display.flip()
+            self.game.reset_events()
 
             """
             updates
@@ -184,10 +232,10 @@ class Controller:
 
     def game_over_loop(self):
         game_over_options = ["Play Again", "Main Menu", "Quit"]
-        while(self.gamestate == "game over"):
+        while(self.game == "game over"):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.gamestate = "quit"
+                    self.game = "quit"
 
                 if event.type == pygame.KEYDOWN:
                     if event.type == pygame.K_UP:
@@ -206,25 +254,29 @@ class Controller:
                             game_over_running = False
 
     def mainloop(self):
-        self.gamestate.state = "menu"
-        running = True
-        while(running):
+        pygame.init()
+        self.game.state = "menu"
+        while(self.game.running):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
-            if self.gamestate.state == "menu":
+                    self.game.running = False
+            if self.game.state == "menu":
                 self.menuloop()
-            elif self.gamestate.state == "settings":
+                self.game.playing = False
+            elif self.game.state == "settings":
                 self.settingsloop()
-            elif self.gamestate.state == "game":
+            elif self.game.state == "game":
                 self.gameloop()
-            elif self.gamestate.state == "game over":
+                self.game.playing = True
+            elif self.game.state == "pause":
+                self.pauseloop()
+            elif self.game.state == "game over":
                 self.game_over_loop()
+                self.game.playing = False
             else:
-                running = False
-
-            pygame.display.flip()
+                self.game.running = False
+                self.game.playing = False
+            
         
         pygame.quit()
         quit()
-
