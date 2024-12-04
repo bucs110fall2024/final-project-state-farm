@@ -1,20 +1,13 @@
 import pygame
 import random
 
-pygame.init()
-
-scr_width = 1000
-scr_length = 600
-scr = pygame.display.set_mode((scr_width, scr_length))
-pygame.display.set_caption("Jake Edelstein CS110 Final Project - Asteroid Dodging Game")
-
 class Ship:
-
-    def __init__(self):
-        self.x = scr_width // 2
-        self.y = scr_length - 100
-        self.sprite = pygame.image.load("player.png")
-        self.velo = 1
+    
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.sprite = pygame.image.load("ship.png").convert()
+        self.velo = 5
         
         self.boost = 100
 
@@ -22,12 +15,15 @@ class Ship:
         keys = pygame.key.get_pressed()
         boosting = keys[pygame.KMOD_CTRL]
         if boosting:
-            self.velo = 2
+            self.velo = 10
             self.boost -= 5
 
         else:
-            if self.boost < 100:
+            self.velo = 5
+            if self.boost < 99:
                 self.boost += 2
+            if self.boost == 99:
+                self.boost += 1
         if keys[pygame.K_LEFT] and self.x > 200:
             self.x -= self.velo
         if keys[pygame.K_RIGHT] and self.x < 800:
@@ -43,12 +39,11 @@ class Ship:
 class Asteroid:
 
     def __init__(self):
-        asteroid_spawning_boundaries = 0, 940
-        self.x = random(asteroid_spawning_boundaries(0), asteroid_spawning_boundaries(1))
+        asteroid_spawning_x_boundary = 940
+        self.x = random(range(asteroid_spawning_x_boundary))
         self.y = 0
-        self.img = pygame.image.load("asteroid.png")
-        self.boost = 100
-        self.fall_speed = 1
+        self.img = pygame.image.load("asteroid.png").convert()
+        self.fall_speed = 5
     
     def fall(self):
         self.y += self.fall_speed
@@ -85,3 +80,10 @@ class Sound:
             self.music.set_volume(1)
         else:
             self.music.set_volume(0)
+
+class GameState:
+    def __init__(self):
+        self.score = 0
+        self.time = 0
+        self.highscore = 0
+        self.state = "menu"
