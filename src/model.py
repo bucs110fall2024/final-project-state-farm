@@ -1,89 +1,184 @@
 import pygame
 import random
+import sys
 
-class Ship:
+SCR_WIDTH = 1000
+SCR_HEIGHT = 800
+
+
+# class GameState:
+#     def __init__(self):
+#         self.score = 0
+#         self.time = Timer()
+#         self.highscore = 0
+#         self.state = "menu"
+
+#     def set_time(self):
+#         if self.time.resume_time == 0:
+#             self.time.start()
+#         if self.state == "game":
+#             self.time.resume()
+#         elif self.state == "pause":
+#             self.time.pause()
+        
+#     # def render_time(self):
+#     #     text_rend = self.font.render(self.time.get_str(), True, "white")
+#     #     rect = text_rend.get_rect(bottomleft = (0, SCR_HEIGHT))
+#     #     self.screen.fill("black", rect)
+#     #     self.screen.blit(text_rend, rect)
     
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.sprite = pygame.image.load("ship.png").convert()
-        self.velo = 5
+#     def update(self):
+#         self.set_time()
+#         # self.render_time()
+
+
+
+
+
+# class GameState:
+#     def __init__(self):
+#         self.running = True
+#         self.playing = False
+#         self.score = 0
+#         self.time = Timer()
+#         self.highscore = 0
+#         self.state = "menu"
+#         self.screen = pygame.display.set_mode((SCR_WIDTH, SCR_HEIGHT))
+#         pygame.display.set_caption("Jake Edelstein CS110 Final Project - Asteroid Dodging Game")
+
+#     def set_time(self):
+#         if self.time.resume_time == 0:
+#             self.time.start()
+#         if self.state == "game":
+#             self.time.resume()
+#         elif self.state == "pause":
+#             self.time.pause()
         
-        self.boost = 100
-
-    def move(self):        
-        keys = pygame.key.get_pressed()
-        boosting = keys[pygame.KMOD_CTRL]
-        if boosting:
-            self.velo = 10
-            self.boost -= 5
-
-        else:
-            self.velo = 5
-            if self.boost < 99:
-                self.boost += 2
-            if self.boost == 99:
-                self.boost += 1
-        if keys[pygame.K_LEFT] and self.x > 200:
-            self.x -= self.velo
-        if keys[pygame.K_RIGHT] and self.x < 800:
-            self.x += self.velo
-        if keys[pygame.K_UP] and self.y > 300:
-            self.y -= self.velo
-        if keys[pygame.K_DOWN] and self.y < 540:
-            self.y += self.velo
+#     def render_time(self):
+#         font = pygame.font.Font("assets/PublicPixel-rv0pA.ttf", 15)
+#         text = font.render(self.time.get_str(), True, "white")
+#         rect = text.get_rect(bottomleft = (0, SCR_HEIGHT))
+#         self.screen.fill("black", rect)
+#         self.screen.blit(text, rect)
     
-    def get_pos(self):
-        return [self.x, self.y]
+#     def update(self):
+#         self.set_time()
+#         self.render_time()
 
-class Asteroid:
 
-    def __init__(self):
-        asteroid_spawning_x_boundary = 940
-        self.x = random(range(asteroid_spawning_x_boundary))
-        self.y = 0
-        self.img = pygame.image.load("asteroid.png").convert()
-        self.fall_speed = 5
+
+
+
+        # self.switch_menu_state()
+        
+
+
+
+
+
+
+
+
+
+
+
+
+# class Menu:
     
-    def fall(self):
-        self.y += self.fall_speed
+#     def __init__(self, game):
+#         self.MENU_STATES = {
+#         "Back" : "menu",
+#         "Main Menu" : "menu",
+#         "Play" : "game",
+#         "Resume" : "game",
+#         "Play Again" : "game",
+#         "Settings" : "settings",
+#         "Quit" : "quit",
+#         "End Game" : "game over"
+#     } 
+#         self.game = game
+#         self.center_x = SCR_WIDTH / 2
+#         self.center_y = SCR_HEIGHT / 2
+#         self.show_menu = True
+#         self.start_y = self.center_y - 30
+#         self.state = "menu"
+#         self.options = []
+#         self.curr_option = 0
+#         self.cursor_offset = -120
+#         self.cursor = Cursor((self.center_x + self.cursor_offset, self.center_y))
 
-class Sound:
+#     # def set_options(self, options):
+#     #     self.options.extend(options)
+
+    # def draw_cursor(self, right_x, mid_y):
+    #     self.cursor = Cursor((right_x, mid_y))
+
+#     def move_cursor(self):
+#         self.game.check_events()
+#         if self.game.UP:
+#             self.curr_option = (self.curr_option - 1) % len(self.options)
+            
+#         if self.game.DOWN:
+#             self.curr_option = (self.curr_option + 1) % len(self.options)
+#         increment = 20
+#         self.cursor.rect.midright = (self.center_x + self.cursor_offset, self.start_y + (increment * self.curr_option))
+#         self.switch_menu_state()
+
+#     def switch_menu_state(self):
+#         """
+#         Responds to user's menu selection by changing the menu state
+#         args: none
+#         return: None
+#         """
+#         if self.game.RETURN:
+#             self.state = self.MENU_STATES.get(self.options[self.curr_option])
+   
+#     def set_menu_state(self, state):
+#         """
+#         Sets the menu state to the inputted 'state' parameter
+#         args: str
+#         return: None
+#         """
+#         self.state = state
+
+#     def pause(self):
+#         if self.MENU_STATES.get(self.options[self.curr_option]) == "game":
+#             self.game.check_events()
+#             if self.game.ESCAPE:
+#                 self.set_menu_state("pause")
+
+#     def select_option(self):
+#         if self.game.RETURN:
+#             self.switch_menu_state()
+
+#     def show_menu(self):
+#         self.show_menu = True
+#         while self.show_menu:
+#             self.game.check_events()
+#             self.game.screen.fill("black")
+#             option_increment = 20
+#             title_y = self.center_y - (len(self.options) * option_increment / 2) - 20
+#             start_y = title_y + 30
+#             self.game.draw_text(self, 25, (self.center_x, title_y))
+#             self.move_cursor(start_y)
+#             self.draw_cursor()
+
+#             for x in self.options:
+#                 self.game.draw_text(x, 20, (self.center_x, start_y))
+#                 start_y += 20
+            
+#         self.game.screen.blit()
+
+#     def update(self):
+#         self.move_cursor()
+#         self.select_option()
+
+# #     def mainloop(self):
+
+
+
+
+
+
+
     
-    def __init__(self):
-        """
-        
-        
-        
-        """
-        self.move_sound = pygame.mixer.Sound("")
-        self.collision_sound = pygame.mixer.Sound("")
-        self.game_over_sound = pygame.mixer.Sound("")
-        self.music = pygame.mixer.Sound("")
-    
-    def toggle_sfx(self):
-        sfx_off = self.move_sound.get_volume() == 0
-        
-        if sfx_off:
-            self.move_sound.set_volume(1)
-            self.collision_sound.set_volume(1)
-            self.game_over_sound.set_volume(1)
-        
-        else:
-            self.move_sound.set_volume(0)
-            self.collision_sound.set_volume(0)
-            self.game_over_sound.set_volume(0)
-
-    def toggle_music(self):
-        music_off = self.music.get_volume() == 0
-        if music_off:
-            self.music.set_volume(1)
-        else:
-            self.music.set_volume(0)
-
-class GameState:
-    def __init__(self):
-        self.score = 0
-        self.time = 0
-        self.highscore = 0
-        self.state = "menu"

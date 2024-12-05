@@ -1,13 +1,44 @@
 import pygame
 
-from src.model import Game, Ship, Asteroid, Sound, Timer, Menu, Cursor, SCR_WIDTH, SCR_HEIGHT
+from src.game import Game
+from src.ship import Ship
+from src.asteroid import Asteroid
+from src.sound import Sound
+from src.timer import Timer
+from src.menu import Menu, MainMenu
 
 class Controller:
     def __init__(self):
         self.game = Game()
         self.menu = Menu(self.game)
-        ship_sprite = Ship((SCR_WIDTH / 2, SCR_HEIGHT - 50))
+        ship_sprite = Ship((self.game.screen_w / 2, self.game.screen_h - 50))
         self.ship = pygame.sprite.GroupSingle(ship_sprite)
+
+    def main_menu_loop(self):
+        while self.menu_open == True:
+            self.check_events()
+            if self.state != "menu":
+                self.menu_open == False
+            self.display.fill("black")
+            
+            self.screen.blit(self.display, (0, 0))
+
+            pygame.display.update()
+            self.reset_events()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # def check_events(self):
     #     """
@@ -115,7 +146,7 @@ class Controller:
             #     curr_option = (curr_option - 1) % len(settings_options)
             # elif self.game.DOWN:
             #     curr_option = (curr_option + 1) % len(settings_options)
-            menu.move_cursor()
+            # menu.move_cursor()
 
             if self.game.RETURN:
                 if settings_options[menu.curr_option] == "SFX":
