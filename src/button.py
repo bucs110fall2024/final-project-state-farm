@@ -15,7 +15,7 @@ class Button(Textbox):
         self.color = color
     
     def draw_button(self, screen):
-        self.draw_textbox(screen, self.text, self.rect.center, self.color)
+        self.draw_textbox(screen, self.text, self.rect.center, False, self.color)
     
     def update(self, screen):
         self.set_color()

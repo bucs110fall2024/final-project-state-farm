@@ -18,7 +18,7 @@ class Textbox(pygame.sprite.Sprite):
     def set_font_size(self, font_size):
         self.font = pygame.font.Font(FONT_NAME, font_size)
     
-    def draw_textbox(self, screen, text, center, color = "white"):
+    def draw_textbox(self, screen, text, center, boxed, color = "white"):
             """
             Draws a text string with inputted font size in a rect defined by its center coordinate
             args: (str) text, (int) size, 
@@ -26,5 +26,8 @@ class Textbox(pygame.sprite.Sprite):
             """
             textbox = self.font.render(text, True, color)
             textbox_rect = textbox.get_rect(center = (center))
-            self.image.fill("black")
+            if boxed:
+                self.image.fill((7, 7, 36))
+            else:
+                self.image.fill("black")
             screen.blit(textbox, textbox_rect)

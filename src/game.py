@@ -32,6 +32,9 @@ class Game:
         #screen & display
         self.screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 
+        #background
+        self.background = pygame.transform.scale(pygame.image.load("assets/background.png"), \
+            (SCREEN_W, SCREEN_H))
         #sprites
         self.ship = Ship((SCREEN_W / 2, SCREEN_H))
         self.myship = pygame.sprite.GroupSingle(self.ship)
@@ -82,6 +85,7 @@ class Game:
 
             quit_button = Button(CENTER_X, START_Y + MENU_BUTTON_Y_INCREMENT * num_buttons, BUTTON_W, BUTTON_H, "QUIT")
             buttons.add(quit_button)
+            num_buttons += 1
 
 
             events = pygame.event.get()
@@ -93,10 +97,8 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if start_button.rect.collidepoint(pygame.mouse.get_pos()):
                         self.state = "game"
-                        buttons.empty()
                     elif options_button.rect.collidepoint(pygame.mouse.get_pos()):
                         self.state = "options"
-                        buttons.empty()
                     elif quit_button.rect.collidepoint(pygame.mouse.get_pos()):
                         pygame.quit()
                         sys.exit()
@@ -105,7 +107,7 @@ class Game:
 
 
             pygame.display.update()
-    
+        
     def gameloop(self):
         while self.state == "game":
             events = pygame.event.get()
@@ -119,7 +121,8 @@ class Game:
                         self.timer.pause()
 
             if not self.timer.paused:
-                
+                #background
+                self.screen.blit(self.background, (0, 0))
                 #timer
                 self.timer.update(self.screen)
                 clock.tick(120)
@@ -137,17 +140,15 @@ class Game:
                 
                 #collision
                 for asteroid in self.asteroids:
+                    asteroid.update()
                     if self.ship.hitbox.colliderect(asteroid.hitbox):
                         asteroid.die()
                         self.timer.pause()
                         pygame.time.delay(1500)
                         self.timer.resume()
                         self.asteroids.add(self.asteroid)
-            
-                #background
-                self.background = pygame.transform.scale(pygame.image.load("assets/background.png"), \
-                    (SCREEN_W, SCREEN_H))
-                self.screen.blit(self.background, (0, 0))
+                
+
 
                 
             
