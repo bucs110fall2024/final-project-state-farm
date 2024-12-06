@@ -128,7 +128,7 @@ class Game:
                 clock.tick(120)
 
                 #player movement
-                self.ship.update()
+                self.myship.update()
 
                 #difficulty increase
                 # if self.timer.curr_time > 
@@ -137,16 +137,18 @@ class Game:
                 for i in range(self.asteroid_template.max_num):
                     self.asteroid = self.asteroid_template
                     self.asteroids.add(self.asteroid)
+                    pygame.time.delay(random.randint(1000, 5000)) ## nums are temporary, will implement a min/max spawning speed
                 
                 #collision
                 for asteroid in self.asteroids:
                     asteroid.update()
                     if self.ship.hitbox.colliderect(asteroid.hitbox):
-                        asteroid.die()
                         self.timer.pause()
                         pygame.time.delay(1500)
-                        self.timer.resume()
-                        self.asteroids.add(self.asteroid)
+                        asteroid.kill()
+                        self.timer.resume() ## This would be for implementing a short pause after being hit, and will only be
+                                            ## utilized if I were to implement multiple lives/hp for the ship
+                        self.asteroids.add(self.asteroid) ## unsure if this line is necessary
                 
 
 
