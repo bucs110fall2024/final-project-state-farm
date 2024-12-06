@@ -1,84 +1,165 @@
-import pygame, sys
-from timer import Timer
-from menu import MainMenu
+import pygame
+import sys
+import random
+from src.ship import Ship
+from src.asteroid import Asteroid
+from src.textbox import Textbox
+from src.timer import Timer
+from src.button import Button
+
+SCREEN_W = 1000
+SCREEN_H = 800
+START_Y = 500
+CENTER_X = 500
+BUTTON_W = 200
+BUTTON_H = MENU_BUTTON_Y_INCREMENT = 80
+BUTTON_FS = 20
+TITLE_Y = 100
+TITLE_W = 300
+TITLE_H = 100
+TITLE_SIZE = 50
+TIMER_X = 120
+TIMER_Y = 30
+TIMER_W = 180
+TIMER_H = 60
+TIMER_FS = 20
+TIMER_INIT_TEXT = "Time: 00:00"
+
+clock = pygame.time.Clock()
 
 class Game:
     def __init__(self):
-        """
-        Initializes the game class
-        """
-        pygame.init()
-        self.screen_w = 1000
-        self.screen_h = 800
-        self.display = pygame.Surface((self.screen_w, self.screen_h))
-        self.screen = pygame.display.set_mode((self.screen_w, self.screen_h))
-        self.running = True
-        self.playing = False
-        self.menu_open = True
-        self.curr_menu = MainMenu(self)
-        self.font = "assets/PublicPixel-rv0pA.ttf"
-        pygame.display.set_caption("Jake Edelstein CS110 Final Project - Asteroid Dodging Game")
+        #screen & display
+        self.screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 
-        self.UP = False
-        self.DOWN = False
-        self.RETURN = False
-        self.ESCAPE = False
+        #sprites
+        self.ship = Ship((SCREEN_W / 2, SCREEN_H))
+        self.myship = pygame.sprite.GroupSingle(self.ship)
 
-        self.score = 0
-        self.time = Timer()
-        self.highscore = 0
+        self.asteroids = pygame.sprite.Group()
+        self.asteroid_template = Asteroid((random.randint(0, SCREEN_W), 0))
+        # for i in range(self.asteroid.max_num):
+        #     self.asteroid = Asteroid((random.randint(0, SCREEN_W), 0))
+        #     self.asteroids.add(self.asteroid)
+
+        self.timer = Timer(TIMER_X, TIMER_Y, TIMER_W, TIMER_H, TIMER_INIT_TEXT)
+        self.mytimer = pygame.sprite.GroupSingle(self.timer)
+
+        #gamestate
         self.state = "menu"
 
-    def set_time(self):
-        if self.time.resume_time == 0:
-            self.time.start()
-        if self.state == "game":
-            self.time.resume()
-        elif self.state == "pause":
-            self.time.pause()
+    def mainloop(self):
         
-    def check_events(self):
-        """
-        Runs a check for all events relevant to the Game class.
-        args: None
-        return: None
-        """
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.type == pygame.K_UP:
-                    self.UP = True
-                if event.type == pygame.K_DOWN:
-                    self.DOWN = True
-                if event.type == pygame.K_RETURN:
-                    self.RETURN = True
-                if event.type == pygame.K_ESCAPE:
-                    self.ESCAPE = True
+        while True:
+            if self.state == "menu":
+                self.menuloop()
+            if self.state == "game":
+                self.gameloop()
+            if self.state == "options":
+                self.optionsloop()
+            if self.state == "game over":
+                self.gameoverloop()
     
-    def reset_events(self):
-        """
-        Sets the values for all recorded events to false
-        args: none
-        return: None
-        """
-        self.UP = False
-        self.DOWN = False
-        self.RETURN = False
-        self.ESCAPE = False
-    
-    def draw_text(self, text, size, center):
-        """
-        Draws a text string with inputted font size in a rect defined by its bottom left coordinate
-        args: str, int, Point
-        return: None
-        """
-        font = pygame.font.Font(self.font, size)
-        text_rend = font.render(text, True, "white")
-        text_rect = text_rend.get_rect(center = (center))
-        self.display.blit(text_rend, text_rect)
+    def menuloop(self):
+        while self.state == "menu":
+            #title
+            title = Textbox(CENTER_X, TITLE_Y, TITLE_W, TITLE_H, "SPACE ROCKS")
+            title.set_font_size(TITLE_SIZE)
+            title.draw_textbox(self.screen, title.text, title.rect.center, "white")
+
+            #buttons
+
+            buttons = pygame.sprite.Group()
+            num_buttons = 0
+
+            start_button = Button(CENTER_X, START_Y, BUTTON_W, BUTTON_H, "START")
+            buttons.add(start_button)
+            num_buttons += 1
+
+            options_button = Button(CENTER_X, START_Y + MENU_BUTTON_Y_INCREMENT * num_buttons, BUTTON_W, BUTTON_H, "OPTIONS")
+            buttons.add(options_button)
+            num_buttons += 1
+
+            quit_button = Button(CENTER_X, START_Y + MENU_BUTTON_Y_INCREMENT * num_buttons, BUTTON_W, BUTTON_H, "QUIT")
+            buttons.add(quit_button)
 
 
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if start_button.rect.collidepoint(pygame.mouse.get_pos()):
+                        self.state = "game"
+                        buttons.empty()
+                    elif options_button.rect.collidepoint(pygame.mouse.get_pos()):
+                        self.state = "options"
+                        buttons.empty()
+                    elif quit_button.rect.collidepoint(pygame.mouse.get_pos()):
+                        pygame.quit()
+                        sys.exit()
+        
+            buttons.update(self.screen)
+
+
+            pygame.display.update()
+    
+    def gameloop(self):
+        while self.state == "game":
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                keys = pygame.key.get_pressed()
+                if event.type == pygame.KEYDOWN:
+                    if keys[pygame.K_ESCAPE]:
+                        self.timer.pause()
+
+            if not self.timer.paused:
+                
+                #timer
+                self.timer.update(self.screen)
+                clock.tick(120)
+
+                #player movement
+                self.ship.update()
+
+                #difficulty increase
+                # if self.timer.curr_time > 
+
+                #asteroids
+                for i in range(self.asteroid_template.max_num):
+                    self.asteroid = self.asteroid_template
+                    self.asteroids.add(self.asteroid)
+                
+                #collision
+                for asteroid in self.asteroids:
+                    if self.ship.hitbox.colliderect(asteroid.hitbox):
+                        asteroid.die()
+                        self.timer.pause()
+                        pygame.time.delay(1500)
+                        self.timer.resume()
+                        self.asteroids.add(self.asteroid)
+            
+                #background
+                self.background = pygame.transform.scale(pygame.image.load("assets/background.png"), \
+                    (SCREEN_W, SCREEN_H))
+                self.screen.blit(self.background, (0, 0))
+
+                
+            
+
+                
+            
+            pygame.display.update()    
+
+
+    def optionsloop(self):
+        pass
+
+    def gameoverloop(self):
+        pass
 

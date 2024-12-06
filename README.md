@@ -53,7 +53,7 @@ My project consists of a ship sprite which is controlled by the player, with the
 
 
 
-| Step|           Procedure                                |        Expected Results           |
+|Step |           Procedure                                |        Expected Results           |
 |-----|:--------------------------------------------------:|----------------------------------:|
 |  1  | Hit the play button.                               | window opens with count = 0       |
 |  2  | Press the W or up arrow key.                       | display changes to count = 1      |

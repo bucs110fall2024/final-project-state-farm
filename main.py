@@ -1,12 +1,12 @@
 import pygame
-import src.controller as controller
+import src.game as game
 
 def main():
     pygame.init()
-    ctrl = controller.Controller()
+    g = game.Game()
     #Create an instance on your controller object
     #Call your mainloop
-    ctrl.menuloop()
+    g.mainloop()
     
     ###### NOTHING ELSE SHOULD GO IN main(), JUST THE ABOVE 3 LINES OF CODE ######
 
