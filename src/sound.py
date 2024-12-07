@@ -8,10 +8,10 @@ class Sound:
         
         
         """
-        self.move_sound = pygame.mixer.Sound("")
-        self.collision_sound = pygame.mixer.Sound("")
-        self.game_over_sound = pygame.mixer.Sound("")
-        self.music = pygame.mixer.Sound("")
+        self.move_sound = pygame.mixer.Sound("assets/move_sound.mp3")
+        self.collision_sound = pygame.mixer.Sound("assets/collision_sfx.mp3")
+        self.game_over_sound = pygame.mixer.Sound("assets/game_over_sfx.mp3")
+        self.music = pygame.mixer.Sound("assets/music.mp3")
     
     def toggle_sfx(self):
         sfx_off = self.move_sound.get_volume() == 0

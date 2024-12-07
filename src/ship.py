@@ -4,13 +4,12 @@ class Ship(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
         self.image = pygame.image.load('assets/ship.png').convert_alpha()
-        self.rect = self.image.get_rect(center = pos)
+        self.hitbox = pygame.mask.from_surface(self.image)
+        self.rect = self.hitbox.get_rect(center = pos)
         self.velo = 5
         self.boosting = False
 
-        self.hitbox = self.rect
-        self.hitbox.center = self.rect.center
-    
+
     def move(self):
         keys = pygame.key.get_pressed()
 
@@ -43,7 +42,7 @@ class Ship(pygame.sprite.Sprite):
         if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and self.rect.bottom <= screen_constraints["bottom"]:
             self.rect.y += self.velo
         
-        self.hitbox.center = self.rect.center     
+        # self.hitbox.center = self.rect.center     
 
     
     def update(self):
