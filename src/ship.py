@@ -6,7 +6,7 @@ class Ship(pygame.sprite.Sprite):
         self.image = pygame.image.load('assets/ship.png').convert_alpha()
         self.hitbox = pygame.mask.from_surface(self.image)
         self.rect = self.hitbox.get_rect(center = pos)
-        self.velo = 5
+        self.velo = 8
         self.boosting = False
 
 

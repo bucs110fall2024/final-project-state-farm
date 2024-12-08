@@ -1,6 +1,6 @@
-import pygame, time
+# import pygame, time
 
-from src.textbox import Textbox, BOX_COLOR
+# from src.textbox import Textbox, BOX_COLOR
 
 # class Timer(Textbox):
 #     def __init__(self, x, y, width, height, text):
@@ -62,4 +62,54 @@ from src.textbox import Textbox, BOX_COLOR
 #     class Score(Textbox):
 #         def __init__(self, x, y, width, height, text):
 #             super().__init__(x, y, width, height, text)
-            
+
+
+
+import pygame, sys, time
+from src.textbox import Textbox, BOX_COLOR
+from src.mytime import MyTime
+
+# class Timer(Textbox):
+#     def __init__(self, x, y, width, height, text):
+#         super().__init__(x, y, width, height, text)
+#         self.mytime = MyTime()
+#         self.text_color = "white"
+#         self.restarting = False
+
+#     def draw_timer(self, screen):
+#         self.draw_textbox(screen, self.text, self.rect.center, self.text_color, BOX_COLOR)
+    
+#     def update(self, screen):
+
+#         if self.restarting:
+#             self.mytime.reset()
+#             self.mytime.start()
+#             self.restarting = False
+
+#         # self.mytime.set_str()
+#         # self.text = self.mytime.time_str
+#         self.text = self.mytime.convert_time_to_str()
+#         self.draw_timer(screen)
+
+
+class Timer(Textbox):
+    def __init__(self, x, y, text):
+        super().__init__(x, y, text)
+        self.mytime = MyTime()
+        # self.set_text_color(text_color)
+        self.restarting = False
+
+    def draw_timer(self, screen):
+        self.draw_textbox(screen)
+    
+    def update(self, screen):
+        if self.restarting:
+            self.mytime.reset()
+            self.mytime.start()
+            self.restarting = False
+
+        # self.mytime.set_str()
+        # self.text = self.mytime.time_str
+        self.text = self.mytime.convert_time_to_str()
+        self.draw_timer(screen)
+
