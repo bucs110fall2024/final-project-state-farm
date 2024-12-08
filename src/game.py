@@ -23,7 +23,7 @@ TITLE_SIZE = OPTIONS_SIZE = GAME_OVER_SIZE = HIGHSCORE_TITLE_SIZE = 50
 TIMER_X = 110
 TIMER_Y = 10
 TIMER_INIT_TEXT = "Time: 00:00"
-SCORE_X = 800
+SCORE_X = 850
 SCORE_Y = 10
 SCORE_INIT_TEXT = "SCORE: 00000000"
 FRAME_RATE = 60
@@ -36,13 +36,6 @@ GAME_BACKGROUND = pygame.image.load("assets/game_background.png")
 END_BACKGROUND = pygame.image.load("assets/end_background.png")
 
 SOUNDS = Sound()
-##If i can get it to work, then channel 0 is reserved for button hovering
-# MUSIC_CHANNEL = pygame.mixer.Channel(1)
-# BUTTON_CLICK_CHANNEL = pygame.mixer.Channel(2)
-# GAME_SFX_CHANNEL = pygame.mixer.Channel(3)
-# GAME_OVER_SFX_CHANNEL = pygame.mixer.Channel(4)
-
-
 clock = pygame.time.Clock()
 
 class Game:
@@ -77,9 +70,10 @@ class Game:
         self.score = Counter(SCORE_X, SCORE_Y, SCORE_INIT_TEXT, "score")
         self.counters.add(self.score)
 
-        self.last_score = 0
+        # self.last_score = 0
+        self.last_scores = []
         self.hs_added = False
-        self.hs_list = [0, 0, 0, 0, 0]
+        self.hs_list = [0] * HIGHSCORE_MAX_NUM
 
 
 
@@ -152,6 +146,7 @@ class Game:
                     if start_button.rect.collidepoint(pygame.mouse.get_pos()):
                         BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
                         self.timer.mytime.start()
+                        self.score.reset()
                         self.state = "game"
                     elif options_button.rect.collidepoint(pygame.mouse.get_pos()):
                         BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
@@ -179,6 +174,17 @@ class Game:
 
         while self.state == "highscores":
         
+            #updating highscores
+            for score in self.last_scores:
+                if score > min(self.hs_list) and not self.hs_added:
+                    self.hs_list.append(score)
+                    print(f"High score list after append: {self.hs_list}") #debug
+                    self.hs_list.sort(reverse = True)
+                    print(f"High score list after sort: {self.hs_list}") #debug
+                    self.hs_list = self.hs_list[:5]
+                    print(f"New high score list: {self.hs_list}") #debug
+                    self.hs_added = True
+            
             #title
             highscore_title = Textbox(CENTER_X, HIGHSCORE_TITLE_Y, "HIGHSCORES")
             highscore_title.set_font_size(HIGHSCORE_TITLE_SIZE)
@@ -197,38 +203,29 @@ class Game:
                         BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound)
                         self.state = "menu"
                 
+            #highscore sprites
             highscore_group = pygame.sprite.Group()
             hs_start_y = 300
-            
-            if self.last_score < min(self.hs_list) and self.last_score not in self.hs_list:
-                temp_list = []
-                if self.last_score > hs and not self.hs_added:
-                    temp_list.append(self.last_score)
-                    self.hs_added = True
-                else:
-                    temp_list.append(hs)
-                self.hs_list = temp_list
+            hs_rank_list = ["1ST", "2ND", "3RD", "4TH", "5TH"]
+            hs_rank_length = 3
+            hs_max_length = 8
+           
+            #initializing sprites with updated highscores and formatting textbox to align scores properly
+            for hs in self.hs_list:
+                curr_rank = hs_rank_list[0]
+                hs_text = f"{curr_rank:<{hs_rank_length}}         {hs:>{hs_max_length}}"
 
-            for x in self.hs_list:
-                hs_text = Textbox(CENTER_X, hs_start_y, str(x))
-                highscore_group.add(hs_text)
+                hs_textbox = Textbox(CENTER_X, hs_start_y, hs_text)
+                highscore_group.add(hs_textbox)
                 hs_start_y += 40
-            # while len(highscore_group) < HIGHSCORE_MAX_NUM:
-            #     hs = Highscore(CENTER_X, hs_start_y, "0", 0)
-            #     highscore_group.add(hs)
-            #     hs_start_y += 40
+                hs_rank_list.pop(0)
             
-            
-            # hs_added = False
-            # for hs in self.highscore_group:
-            #     if self.score.myscore > hs.get_score() and not hs_added:
-            #         hs.set_text(str(self.score.myscore))
-            #         hs.set_score(self.score.myscore)
-            #         hs_added = True
-
+            #update display
             self.screen.fill("black")
             highscore_title.draw_textbox(self.screen, "white", "black")
             highscore_buttons.update(self.screen, "black")
+            
+
             for hs in highscore_group:
                 hs.draw_textbox(self.screen, "white", "black")
 
@@ -271,9 +268,9 @@ class Game:
                 if pygame.sprite.spritecollide(self.ship, self.asteroids, False, pygame.sprite.collide_mask):
                     #reset all necessary variables
                     has_collided = True
-                    self.last_score = self.score.myscore
+                    self.last_scores.append(self.score.myscore)
+                    print(f"Last scores: {self.last_scores}")  #debugging last scores
                     self.timer.mytime.stop()
-                    self.last_score = self.timer.myscore
                     self.asteroids.empty()
                     self.asteroid_last_spawn = 0
                     self.asteroid_fall_speed = INIT_FALL_SPEED
@@ -315,25 +312,6 @@ class Game:
 
                     for asteroid in self.asteroids:
                         asteroid.set_fall_speed(self.asteroid_fall_speed)
-
-                # #collision
-                # if pygame.sprite.spritecollide(self.ship, self.asteroids, False, pygame.sprite.collide_mask):
-                #     #without lives
-                #     self.timer.mytime.stop()
-                #     self.last_score = self.timer.myscore
-                #     self.asteroids.empty()
-                #     self.asteroid_last_spawn = 0
-                #     self.asteroid_fall_speed = INIT_FALL_SPEED
-                #     self.asteroid_stagger = ASTEROID_INIT_STAGGER
-                #     self.asteroid_speed_increase_cooldown = INIT_SPEED_INCREASE_COOLDOWN
-                #     self.asteroid_stagger_decrease_cooldown = INIT_STAGGER_DECREASE_COOLDOWN
-                #     self.myship.empty()
-                #     MUSIC_CHANNEL.stop()
-                #     GAME_SFX_CHANNEL.play(SOUNDS.collision_sound, 0)
-                #     pygame.time.wait(2000)
-                #     self.state = "game over"
-
-                    # pygame.display.update()
 
             #update screen
                 self.screen.blit(self.background, (0, 0))
@@ -463,14 +441,6 @@ class Game:
             # self.last_score = self.timer.myscore
             self.hs_added = False
             
-            # while not self.hs_added:
-            #     for hs in self.highscore_group:
-            #         if self.score.myscore > hs.get_score():
-            #             self.hs_added = True
-            #             hs.set_text(str(self.score.myscore))
-            #             hs.set_score(self.score.myscore)
-            #     self.hs_added = True
-
             #update screen
             
             self.screen.fill("black")
