@@ -1,4 +1,4 @@
-import pygame, sys, time
+import time
 
 class MyTime:
     def __init__(self):

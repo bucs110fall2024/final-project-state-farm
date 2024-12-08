@@ -65,9 +65,7 @@ class Game:
 
         self.asteroids = pygame.sprite.Group()
         self.asteroid_fall_speed = ASTEROID_INIT_FALL_SPEED
-        # self.asteroid_max_num = ASTEROID_INIT_NUM
         self.asteroid_speed_increase_cooldown = INIT_SPEED_INCREASE_COOLDOWN
-        # self.asteroid_max_num_increase_cooldown = INIT_MAX_NUM_INCREASE_COOLDOWN
         self.asteroid_stagger = ASTEROID_INIT_STAGGER
         self.asteroid_stagger_decrease_cooldown = INIT_STAGGER_DECREASE_COOLDOWN
         self.asteroid_last_spawn = 0
@@ -79,15 +77,11 @@ class Game:
         self.score = Counter(SCORE_X, SCORE_Y, SCORE_INIT_TEXT, "score")
         self.counters.add(self.score)
 
-        self.hs_counter = 0
+        self.last_score = 0
         self.hs_added = False
-        self.highscore_group = pygame.sprite.Group()
-        hs_start_y = 300
-       
-        while len(self.highscore_group) < HIGHSCORE_MAX_NUM:
-            hs = Highscore(CENTER_X, hs_start_y, "0", 0)
-            self.highscore_group.add(hs)
-            hs_start_y += 40
+        self.hs_list = [0, 0, 0, 0, 0]
+
+
 
         #gamestate
         self.state = "menu"
@@ -124,7 +118,7 @@ class Game:
         while self.state == "menu":
             
             #title
-            title = Textbox(CENTER_X, TITLE_Y, "SPACE ROCKS", "white")
+            title = Textbox(CENTER_X, TITLE_Y, "SPACE ROCKS")
             title.set_font_size(TITLE_SIZE)
 
             #buttons
@@ -202,6 +196,28 @@ class Game:
                     if back_button.rect.collidepoint(pygame.mouse.get_pos()):
                         BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound)
                         self.state = "menu"
+                
+            highscore_group = pygame.sprite.Group()
+            hs_start_y = 300
+            
+            if self.last_score < min(self.hs_list) and self.last_score not in self.hs_list:
+                temp_list = []
+                if self.last_score > hs and not self.hs_added:
+                    temp_list.append(self.last_score)
+                    self.hs_added = True
+                else:
+                    temp_list.append(hs)
+                self.hs_list = temp_list
+
+            for x in self.hs_list:
+                hs_text = Textbox(CENTER_X, hs_start_y, str(x))
+                highscore_group.add(hs_text)
+                hs_start_y += 40
+            # while len(highscore_group) < HIGHSCORE_MAX_NUM:
+            #     hs = Highscore(CENTER_X, hs_start_y, "0", 0)
+            #     highscore_group.add(hs)
+            #     hs_start_y += 40
+            
             
             # hs_added = False
             # for hs in self.highscore_group:
@@ -213,7 +229,7 @@ class Game:
             self.screen.fill("black")
             highscore_title.draw_textbox(self.screen, "white", "black")
             highscore_buttons.update(self.screen, "black")
-            for hs in self.highscore_group:
+            for hs in highscore_group:
                 hs.draw_textbox(self.screen, "white", "black")
 
             pygame.display.update()
@@ -224,6 +240,8 @@ class Game:
         args: none
         return: None
         """
+        has_collided = False
+        
         #set background
         self.background = pygame.transform.scale(GAME_BACKGROUND.convert_alpha(), (SCREEN_W, SCREEN_H))
         
@@ -247,69 +265,90 @@ class Game:
             if self.timer.restarting:
                 self.ship = Ship((SCREEN_W / 2, SCREEN_H - 50))
                 self.myship = pygame.sprite.GroupSingle(self.ship)
-            
             #restart
-            # self.mytimer.update(self.screen)
-            self.counters.update(self.screen)
-            # if not self.timer.paused:
-
-            #difficulty increase
-            speed_increase = math.floor(self.timer.mytime.get_time() / self.asteroid_speed_increase_cooldown) == 1
-            # max_num_increase = math.floor(self.timer.mytime.get_time() / self.asteroid_max_num_increase_cooldown) == 1
-            stagger_decrease = math.floor(self.timer.mytime.get_time() / self.asteroid_stagger_decrease_cooldown) == 1
-
-            if speed_increase:
-                self.asteroid_fall_speed += 2
-                self.asteroid_speed_increase_cooldown += self.asteroid_speed_increase_cooldown
-            # if max_num_increase and self.asteroid_max_num <= 8:
-            #     self.asteroid_max_num += 1
-            #     self.asteroid_max_num_increase_cooldown += self.asteroid_max_num_increase_cooldown
-            if stagger_decrease:
-                if self.asteroid_stagger > 0.1:
-                    self.asteroid_stagger -= 0.1
-                else:
-                    self.asteroid_stagger *= 0.8
-
-                self.asteroid_stagger_decrease_cooldown += self.asteroid_stagger_decrease_cooldown
-
-            #respawning asteroids / asteroid spawning cooldown
-            if self.timer.mytime.get_time() - self.asteroid_last_spawn >= self.asteroid_stagger:
-                newasteroid = Asteroid((random.randint(0, SCREEN_W), 0))
-                self.asteroid_last_spawn = self.timer.mytime.get_time()
-                self.asteroids.add(newasteroid)
+            if not self.timer.mytime.paused:
+                #collision
+                if pygame.sprite.spritecollide(self.ship, self.asteroids, False, pygame.sprite.collide_mask):
+                    #reset all necessary variables
+                    has_collided = True
+                    self.last_score = self.score.myscore
+                    self.timer.mytime.stop()
+                    self.last_score = self.timer.myscore
+                    self.asteroids.empty()
+                    self.asteroid_last_spawn = 0
+                    self.asteroid_fall_speed = INIT_FALL_SPEED
+                    self.asteroid_stagger = ASTEROID_INIT_STAGGER
+                    self.asteroid_speed_increase_cooldown = INIT_SPEED_INCREASE_COOLDOWN
+                    self.asteroid_stagger_decrease_cooldown = INIT_STAGGER_DECREASE_COOLDOWN
+                    self.myship.empty()
+                    MUSIC_CHANNEL.stop()
+                    GAME_SFX_CHANNEL.play(SOUNDS.collision_sound, 0)
+                    pygame.time.wait(2000)
+                    self.state = "game over"
+            
                 
+                
+                if not has_collided:
+                    self.counters.update(self.screen)
 
-            for asteroid in self.asteroids:
-                asteroid.set_fall_speed(self.asteroid_fall_speed)
+                    #difficulty increase
+                    speed_increase = math.floor(self.timer.mytime.get_time() / self.asteroid_speed_increase_cooldown) == 1
+                    stagger_decrease = math.floor(self.timer.mytime.get_time() / self.asteroid_stagger_decrease_cooldown) == 1
 
-            #collision
-            if pygame.sprite.spritecollide(self.ship, self.asteroids, False, pygame.sprite.collide_mask):
-                #without lives
-                self.timer.mytime.stop()
-                self.asteroids.empty()
-                self.asteroid_last_spawn = 0
-                self.asteroid_fall_speed = INIT_FALL_SPEED
-                # self.asteroids_max_num = ASTEROID_INIT_NUM
-                self.asteroid_stagger = ASTEROID_INIT_STAGGER
-                self.asteroid_speed_increase_cooldown = INIT_SPEED_INCREASE_COOLDOWN
-                self.asteroid_stagger_decrease_cooldown = INIT_STAGGER_DECREASE_COOLDOWN
-                self.myship.empty()
-                MUSIC_CHANNEL.stop()
-                GAME_SFX_CHANNEL.play(SOUNDS.collision_sound, 0)
-                pygame.time.wait(2000)
-                self.state = "game over"
+                    if speed_increase:
+                        self.asteroid_fall_speed += 2
+                        self.asteroid_speed_increase_cooldown += self.asteroid_speed_increase_cooldown
+                    if stagger_decrease:
+                        if self.asteroid_stagger > 0.1:
+                            self.asteroid_stagger -= 0.1
+                        else:
+                            self.asteroid_stagger *= 0.8
 
-                pygame.display.update()
+                        self.asteroid_stagger_decrease_cooldown += self.asteroid_stagger_decrease_cooldown
+
+                    #respawning asteroids / asteroid spawning cooldown
+                    if self.timer.mytime.get_time() - self.asteroid_last_spawn >= self.asteroid_stagger:
+                        newasteroid = Asteroid((random.randint(0, SCREEN_W), 0))
+                        self.asteroid_last_spawn = self.timer.mytime.get_time()
+                        self.asteroids.add(newasteroid)
+                        
+
+                    for asteroid in self.asteroids:
+                        asteroid.set_fall_speed(self.asteroid_fall_speed)
+
+                # #collision
+                # if pygame.sprite.spritecollide(self.ship, self.asteroids, False, pygame.sprite.collide_mask):
+                #     #without lives
+                #     self.timer.mytime.stop()
+                #     self.last_score = self.timer.myscore
+                #     self.asteroids.empty()
+                #     self.asteroid_last_spawn = 0
+                #     self.asteroid_fall_speed = INIT_FALL_SPEED
+                #     self.asteroid_stagger = ASTEROID_INIT_STAGGER
+                #     self.asteroid_speed_increase_cooldown = INIT_SPEED_INCREASE_COOLDOWN
+                #     self.asteroid_stagger_decrease_cooldown = INIT_STAGGER_DECREASE_COOLDOWN
+                #     self.myship.empty()
+                #     MUSIC_CHANNEL.stop()
+                #     GAME_SFX_CHANNEL.play(SOUNDS.collision_sound, 0)
+                #     pygame.time.wait(2000)
+                #     self.state = "game over"
+
+                    # pygame.display.update()
 
             #update screen
-            self.screen.blit(self.background, (0, 0))
-            self.myship.update()
-            self.myship.draw(self.screen)
-            self.asteroids.update()
-            self.asteroids.draw(self.screen)
-            # self.mytimer.update(self.screen)
-            self.counters.update(self.screen)
+                self.screen.blit(self.background, (0, 0))
+                self.myship.update()
+                self.myship.draw(self.screen)
+                self.asteroids.update()
+                self.asteroids.draw(self.screen)
+                self.counters.update(self.screen)
 
+            else:
+                pause = Textbox(CENTER_X, 200 , "PAUSED")
+                resume_message = Textbox(CENTER_X, 400, "PRESS ESC TO RESUME")
+
+                pause.draw_textbox(self.screen)
+                resume_message.draw_textbox(self.screen)
             pygame.display.update()
             clock.tick(FRAME_RATE)
 
@@ -406,6 +445,7 @@ class Game:
                     if play_again_button.rect.collidepoint(pygame.mouse.get_pos()):
                         self.timer.restarting = True
                         self.timer.mytime.start()
+                        self.score.reset()
                         self.state = "game"
                         BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
                     elif options_button.rect.collidepoint(pygame.mouse.get_pos()):
@@ -420,15 +460,16 @@ class Game:
             game_over_textbox = Textbox(CENTER_X, GAME_OVER_Y, "OH NO! YOU EXPLODED!")
             game_over_textbox.set_font_size(50)
 
+            # self.last_score = self.timer.myscore
             self.hs_added = False
             
-            while not self.hs_added:
-                for hs in self.highscore_group:
-                    if self.score.myscore > hs.get_score():
-                        self.hs_added = True
-                        hs.set_text(str(self.score.myscore))
-                        hs.set_score(self.score.myscore)
-                self.hs_added = True
+            # while not self.hs_added:
+            #     for hs in self.highscore_group:
+            #         if self.score.myscore > hs.get_score():
+            #             self.hs_added = True
+            #             hs.set_text(str(self.score.myscore))
+            #             hs.set_score(self.score.myscore)
+            #     self.hs_added = True
 
             #update screen
             

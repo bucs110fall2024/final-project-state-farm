@@ -31,7 +31,7 @@ BOX_COLOR = (7, 7, 36)
 #             screen.blit(textbox, textbox_rect)
 
 class Textbox(pygame.sprite.Sprite):
-    def __init__(self, x, y, text, text_color = "white"):
+    def __init__(self, x, y, text, text_color = "white", width = None, height = None):
         super().__init__()
         self.font_size = 20
         self.font = pygame.font.Font(FONT_NAME, self.font_size)
@@ -39,9 +39,13 @@ class Textbox(pygame.sprite.Sprite):
         self.y = y
         self.text = text
         self.text_color = text_color
-
-        self.image = self.font.render(self.text, True, "white")
-        self.rect = self.image.get_rect(center=(x, y))
+        if width != None and height != None:
+            self.image = pygame.Surface((width, height))
+            self.rect = self.image.get_rect(center = (x, y))
+        
+        else:
+            self.image = self.font.render(self.text, True, "white")
+            self.rect = self.image.get_rect(center=(x, y))
 
     def set_font_size(self, font_size):
         self.font = pygame.font.Font(FONT_NAME, font_size)
