@@ -65,8 +65,8 @@
 
 
 
-import pygame, sys, time
-from src.textbox import Textbox, BOX_COLOR
+import math
+from src.textbox import Textbox
 from src.mytime import MyTime
 
 # class Timer(Textbox):
@@ -92,24 +92,44 @@ from src.mytime import MyTime
 #         self.draw_timer(screen)
 
 
-class Timer(Textbox):
-    def __init__(self, x, y, text):
+class Counter(Textbox):
+    def __init__(self, x, y, text, type):
         super().__init__(x, y, text)
         self.mytime = MyTime()
         # self.set_text_color(text_color)
         self.restarting = False
+        self.myscore = self.real_score = 0
+        self.last_score = 0
+        self.type = type
 
-    def draw_timer(self, screen):
-        self.draw_textbox(screen)
+    def draw_counter(self, screen, text_color = "white", box_color = "Black"):
+        self.draw_textbox(screen, text_color, box_color)
     
     def update(self, screen):
         if self.restarting:
             self.mytime.reset()
             self.mytime.start()
+
+            self.last_score = self.real_score
+            self.real_score = 0
             self.restarting = False
 
-        # self.mytime.set_str()
-        # self.text = self.mytime.time_str
-        self.text = self.mytime.convert_time_to_str()
-        self.draw_timer(screen)
+        if self.type == "timer":
+            self.text = self.mytime.convert_time_to_str()
+        elif self.type == "score":
+            self.calculate_score()
+            self.text = self.convert_score_to_str()
+        self.draw_counter(screen)
+    
+    def calculate_score(self):
+        curr_time = self.mytime.get_time()
+        pts_per_update = (1 / math.pow(1000, ((curr_time + 0.000001)))) #avoid div. by 0 error
+        self.real_score += pts_per_update
+        self.myscore = int(self.real_score)
+    
+    def convert_score_to_str(self):
+        score_str = "SCORE: " + f"{self.myscore:08}"
+        return score_str
+        
+
 

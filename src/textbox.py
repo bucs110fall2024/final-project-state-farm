@@ -54,7 +54,7 @@ class Textbox(pygame.sprite.Sprite):
     
     def set_text(self, text):
         self.image = self.font.render(text, True, self.text_color)
-        # self.text = text
+        self.text = text
     
     def draw_textbox(self, screen, text_color = "white", box_color = BOX_COLOR):
             """

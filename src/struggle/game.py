@@ -1,5 +1,5 @@
 import pygame, sys
-from timer import Timer
+from counter import Timer
 from menu import MainMenu
 
 class Game:
