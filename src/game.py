@@ -7,7 +7,6 @@ from src.asteroid import Asteroid, INIT_FALL_SPEED
 from src.textbox import Textbox, BOX_COLOR
 from src.counter import Counter
 from src.button import Button
-from src.highscore import Highscore
 from src.sound import Sound, MUSIC_CHANNEL, BUTTON_CLICK_CHANNEL, GAME_SFX_CHANNEL, GAME_OVER_SFX_CHANNEL
 
 SCREEN_W = 1000
@@ -27,7 +26,7 @@ SCORE_X = 850
 SCORE_Y = 10
 SCORE_INIT_TEXT = "SCORE: 00000000"
 FRAME_RATE = 60
-GAME_OVER_Y = 200
+GAME_OVER_Y = 50
 ASTEROID_INIT_FALL_SPEED = 6
 ASTEROID_INIT_STAGGER = 0.8
 INIT_SPEED_INCREASE_COOLDOWN = 20
@@ -42,16 +41,12 @@ class Game:
     def __init__(self):
         """
         initializes key parts of the game (screen, sprites/sprite groups, timer, gamestate)
-        args: none
+        args: None
         return: None
         """
-
         #screen
         self.screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 
-        # #background
-        # self.background = (GAME_BACKGROUND, \
-        #     (SCREEN_W, SCREEN_H))
         #sprites
         self.ship = Ship((SCREEN_W / 2, SCREEN_H - 50))
         self.myship = pygame.sprite.GroupSingle(self.ship)
@@ -64,26 +59,31 @@ class Game:
         self.asteroid_last_spawn = 0
 
         self.counters = pygame.sprite.Group()
-        
         self.timer = Counter(TIMER_X, TIMER_Y, TIMER_INIT_TEXT, "timer")
         self.counters.add(self.timer)
         self.score = Counter(SCORE_X, SCORE_Y, SCORE_INIT_TEXT, "score")
         self.counters.add(self.score)
 
-        # self.last_score = 0
-        self.last_scores = []
+        #variables to update highscores
+        self.last_score = 0
         self.hs_added = False
         self.hs_list = [0] * HIGHSCORE_MAX_NUM
-
-
 
         #gamestate
         self.state = "menu"
 
+    def reset_game(self):
+        """
+        Resets the necessary variables to initialize the game state.
+        args: None
+        return: None 
+        """
+        ...
+
     def mainloop(self):
         """
         Allows program to switch between gamestates
-        args: none
+        args: None
         return: None
         """
         while True:
@@ -98,11 +98,10 @@ class Game:
             if self.state == "game over":
                 self.gameoverloop()
 
-    
     def menuloop(self):
         """
         displays and manages the menu screen
-        args: none
+        args: None
         return: None
         """
 
@@ -116,7 +115,6 @@ class Game:
             title.set_font_size(TITLE_SIZE)
 
             #buttons
-
             menu_buttons = pygame.sprite.Group()
             num_buttons = 0
 
@@ -134,6 +132,7 @@ class Game:
 
             highscore_button = Button(HIGHSCORE_X, HIGHSCORE_Y, "HIGHSCORES")
             menu_buttons.add(highscore_button)
+            num_buttons += 1
 
 
             events = pygame.event.get()
@@ -142,22 +141,26 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if start_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
-                        self.timer.mytime.start()
-                        self.score.reset()
-                        self.state = "game"
-                    elif options_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
-                        self.state = "options"
-                    elif highscore_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
-                        self.state = "highscores"
-                    elif quit_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
-                        pygame.quit()
-                        sys.exit()
+                # if event.type == pygame.MOUSEBUTTONDOWN:
+                # if start_button.rect.collidepoint(pygame.mouse.get_pos()):
+                if start_button.is_clicked(event):
+                    BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
+                    self.timer.mytime.start()
+                    self.score.reset()
+                    self.state = "game"
+                # elif options_button.rect.collidepoint(pygame.mouse.get_pos()):
+                elif options_button.is_clicked(event):
+                    BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
+                    self.state = "options"
+                # elif highscore_button.rect.collidepoint(pygame.mouse.get_pos()):
+                elif highscore_button.is_clicked(event):
+                    BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
+                    self.state = "highscores"
+                # elif quit_button.rect.collidepoint(pygame.mouse.get_pos()):
+                elif quit_button.is_clicked(event):
+                    BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
+                    pygame.quit()
+                    sys.exit()
         
             #update screen
             self.screen.fill("black")
@@ -168,23 +171,11 @@ class Game:
     def highscoreloop(self):
         """
         updates and displays the 5 highest recorded scores within the current launch
-        args: none
+        args: None
         return: None        
         """
 
         while self.state == "highscores":
-        
-            #updating highscores
-            for score in self.last_scores:
-                if score > min(self.hs_list) and not self.hs_added:
-                    self.hs_list.append(score)
-                    print(f"High score list after append: {self.hs_list}") #debug
-                    self.hs_list.sort(reverse = True)
-                    print(f"High score list after sort: {self.hs_list}") #debug
-                    self.hs_list = self.hs_list[:5]
-                    print(f"New high score list: {self.hs_list}") #debug
-                    self.hs_added = True
-            
             #title
             highscore_title = Textbox(CENTER_X, HIGHSCORE_TITLE_Y, "HIGHSCORES")
             highscore_title.set_font_size(HIGHSCORE_TITLE_SIZE)
@@ -198,10 +189,9 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if back_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound)
-                        self.state = "menu"
+                if back_button.is_clicked(event):
+                    BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound)
+                    self.state = "menu"
                 
             #highscore sprites
             highscore_group = pygame.sprite.Group()
@@ -215,9 +205,11 @@ class Game:
                 curr_rank = hs_rank_list[0]
                 hs_text = f"{curr_rank:<{hs_rank_length}}         {hs:>{hs_max_length}}"
 
-                hs_textbox = Textbox(CENTER_X, hs_start_y, hs_text)
-                highscore_group.add(hs_textbox)
-                hs_start_y += 40
+                #only creates highscore texts for non-zero scores
+                if hs != 0:
+                    hs_textbox = Textbox(CENTER_X, hs_start_y, hs_text)
+                    highscore_group.add(hs_textbox)
+                    hs_start_y += 40
                 hs_rank_list.pop(0)
             
             #update display
@@ -234,7 +226,7 @@ class Game:
     def gameloop(self):
         """
         displays and manages the game screen
-        args: none
+        args: None
         return: None
         """
         has_collided = False
@@ -246,6 +238,7 @@ class Game:
         MUSIC_CHANNEL.play(SOUNDS.game_music, -1)
 
         while self.state == "game":            
+            self.hs_added = False
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
@@ -268,8 +261,19 @@ class Game:
                 if pygame.sprite.spritecollide(self.ship, self.asteroids, False, pygame.sprite.collide_mask):
                     #reset all necessary variables
                     has_collided = True
-                    self.last_scores.append(self.score.myscore)
-                    print(f"Last scores: {self.last_scores}")  #debugging last scores
+                    self.last_score = self.score.myscore
+                    #updating highscores
+                    if self.score.myscore > min(self.hs_list) and not self.hs_added:
+                        self.hs_list.append(self.score.myscore)
+                        print(f"High score list after append: {self.hs_list}") #debug
+                        self.hs_list.sort(reverse = True)
+                        print(f"High score list after sort: {self.hs_list}") #debug
+                        self.hs_list = self.hs_list[:HIGHSCORE_MAX_NUM]
+                        print(f"New high score list: {self.hs_list}") #debug
+                        self.hs_added = True
+                        
+                    
+                    # print(f"Last scores: {self.last_scores}")  #debugging last scores
                     self.timer.mytime.stop()
                     self.asteroids.empty()
                     self.asteroid_last_spawn = 0
@@ -370,18 +374,17 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if sfx_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
-                        SOUNDS.toggle_sfx()
-                    elif music_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
-                        SOUNDS.toggle_music()
-                        if SOUNDS.music_on:
-                            MUSIC_CHANNEL.play(SOUNDS.options_music, -1)
-                    elif back_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
-                        self.state = "menu"
+                if sfx_button.is_clicked(event):
+                    BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
+                    SOUNDS.toggle_sfx()
+                elif music_button.is_clicked(event):
+                    BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
+                    SOUNDS.toggle_music()
+                    if SOUNDS.music_on:
+                        MUSIC_CHANNEL.play(SOUNDS.options_music, -1)
+                elif back_button.is_clicked(event):
+                    BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
+                    self.state = "menu"
             
             self.screen.fill("black")
             title.draw_textbox(self.screen, "white", "black")
@@ -389,6 +392,7 @@ class Game:
             pygame.display.update()
 
     def gameoverloop(self):
+        self.timer.restarting = True
         #music
         MUSIC_CHANNEL.stop()
         GAME_OVER_SFX_CHANNEL.play(SOUNDS.game_over_sound, 0)
@@ -409,6 +413,10 @@ class Game:
             game_over_buttons.add(options_button)
             num_buttons += 1
 
+            menu_button = Button(CENTER_X, PLAY_AGAIN_Y + MENU_BUTTON_Y_INCREMENT * num_buttons, "BACK TO MENU")
+            game_over_buttons.add(menu_button)
+            num_buttons += 1
+
             quit_button = Button(CENTER_X, PLAY_AGAIN_Y + MENU_BUTTON_Y_INCREMENT * num_buttons, "QUIT")
             game_over_buttons.add(quit_button)
             num_buttons += 1
@@ -421,14 +429,14 @@ class Game:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if play_again_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        self.timer.restarting = True
                         self.timer.mytime.start()
                         self.score.reset()
                         self.state = "game"
                         BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
                     elif options_button.rect.collidepoint(pygame.mouse.get_pos()):
-                        self.timer.restarting = True
                         self.state = "options"
+                    elif menu_button.rect.collidepoint(pygame.mouse.get_pos()):
+                        self.state = "menu"
                         BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
                     elif quit_button.rect.collidepoint(pygame.mouse.get_pos()):
                         BUTTON_CLICK_CHANNEL.play(SOUNDS.button_click_sound, 0)
@@ -438,16 +446,18 @@ class Game:
             game_over_textbox = Textbox(CENTER_X, GAME_OVER_Y, "OH NO! YOU EXPLODED!")
             game_over_textbox.set_font_size(50)
 
-            # self.last_score = self.timer.myscore
-            self.hs_added = False
+            final_score_textbox = Textbox(CENTER_X, GAME_OVER_Y + 200, f"SCORE: {self.last_score}")
+
+
+            # self.hs_added = False
             
             #update screen
             
             self.screen.fill("black")
             # self.screen.blit(self.background, (0, 0))
-            for counter in self.counters:
-                counter.draw_counter(self.screen)
+            # for counter in self.counters:
+            #     counter.draw_counter(self.screen)
             game_over_textbox.draw_textbox(self.screen, "white", "black")
-
+            final_score_textbox.draw_textbox(self.screen, "white", "black")
             game_over_buttons.update(self.screen, BOX_COLOR)
             pygame.display.update()

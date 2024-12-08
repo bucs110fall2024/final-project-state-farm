@@ -7,10 +7,15 @@ class Ship(pygame.sprite.Sprite):
         self.hitbox = pygame.mask.from_surface(self.image)
         self.rect = self.hitbox.get_rect(center = pos)
         self.velo = 8
-        self.boosting = False
+        # self.boosting = False
 
 
     def move(self):
+        """
+        Moves the ship's position based on keys pressed.
+        args: None
+        return: None
+        """
         keys = pygame.key.get_pressed()
 
     #     boosting = self.boost >= 50 and pygame.key.get_mods() & pygame.KMOD_CTRL
@@ -41,9 +46,6 @@ class Ship(pygame.sprite.Sprite):
             self.rect.y -= self.velo
         if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and self.rect.bottom <= screen_constraints["bottom"]:
             self.rect.y += self.velo
-        
-        # self.hitbox.center = self.rect.center     
-
     
     def update(self):
         self.move()

@@ -41,16 +41,28 @@ class Button(Textbox):
         self.was_unhovered = True
 
     def set_hovered(self):
-        color = self.text_color
+        """
+        updates the button depending on if it is currently hovered.
+        args: None
+        return: None
+        """
+        # color = self.text_color
+        
         if self.hovered:
-            color = self.hov_color
-        #     if self.was_unhovered:
-        #         pygame.mixer.Channel(0).play(self.hover_sound, 0)
-        #         self.was_unhovered = False
-        # else:
-        #     self.was_unhovered = True
-        self.color = color
+            self.color = self.hov_color
+            if self.was_unhovered:
+                pygame.mixer.Channel(0).play(self.hover_sound, 0)
+                self.was_unhovered = False
+        else:
+            self.was_unhovered = True
+            self.color = self.text_color
     
+    def is_clicked(self, event):
+        is_clicked = False
+        if self.hovered and event.type == pygame.MOUSEBUTTONDOWN:
+            is_clicked = True
+        return is_clicked
+        
     def draw_button(self, screen, box_color):
         self.draw_textbox(screen, self.color, box_color)
     

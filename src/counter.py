@@ -45,7 +45,7 @@ class Counter(Textbox):
     def calculate_score(self):
         """
         Calculates the current score.
-        args: none
+        args: None
         return: None
         """
         curr_time = self.mytime.get_time()  #gets the current time in seconds
@@ -56,7 +56,7 @@ class Counter(Textbox):
     def convert_score_to_str(self):
         """
         Converts the current score to a string.
-        args: none
+        args: None
         return: (str) score_str
         """
         score_str = "SCORE: " + f"{self.myscore:08}"
