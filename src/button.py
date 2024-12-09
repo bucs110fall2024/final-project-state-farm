@@ -1,73 +1,53 @@
 import pygame
 from src.textbox import Textbox
+from src.sound import Sound, BUTTON_CHANNEL
 
-# class Button(Textbox):
-#     def __init__(self, x, y, width, height, text):
-#         super().__init__(x, y, width, height, text)
-#         self.color = self.text_color = "white"
-#         self.hov_color = (255, 234, 0)
-#         self.hover_sound = pygame.mixer.Sound("assets/button_hover.mp3")
-#         self.hovered = self.rect.collidepoint(pygame.mouse.get_pos())
-#         self.was_unhovered = True
-
-#     def set_hovered(self):
-#         color = self.text_color
-#         if self.hovered:
-#             color = self.hov_color
-#             if self.was_unhovered:
-#                 pygame.mixer.Channel(0).play(self.hover_sound, 0)
-#             self.was_unhovered = False
-#         else:
-#             self.was_unhovered = True
-#         self.color = color
-    
-#     def draw_button(self, screen, box_color):
-#         self.draw_textbox(screen, self.text, self.rect.center, self.color, box_color)
-    
-#     def update(self, screen, box_color):
-#         self.set_hovered()
-#         self.draw_button(screen, box_color)
-#         if self.hovered:
-#             self.was_unhovered = False
-
+SOUNDS = Sound()
 
 class Button(Textbox):
     def __init__(self, x, y, text):
+        """
+        Creates a Button as a modified version of a Textbox which can be hovered and clicked.
+        args: (int) x, (int) y, (str) text
+        return: None
+        """
         super().__init__(x, y, text)
         self.color = self.text_color = "white"
         self.hov_color = (255, 234, 0)
-        self.hover_sound = pygame.mixer.Sound("assets/button_hover.mp3")
         self.hovered = self.rect.collidepoint(pygame.mouse.get_pos())
-        self.was_unhovered = True
 
     def set_hovered(self):
         """
-        updates the button depending on if it is currently hovered.
+        Updates the button depending on if it is currently hovered.
         args: None
         return: None
         """
-        # color = self.text_color
-        
-        if self.hovered:
+        now_hovered = self.rect.collidepoint(pygame.mouse.get_pos())
+        self.color = self.text_color
+        if now_hovered:
+            if not self.hovered:
+                BUTTON_CHANNEL.play(SOUNDS.button_hover_sound, 0)
             self.color = self.hov_color
-            if self.was_unhovered:
-                pygame.mixer.Channel(0).play(self.hover_sound, 0)
-                self.was_unhovered = False
-        else:
-            self.was_unhovered = True
-            self.color = self.text_color
     
     def is_clicked(self, event):
+        """
+        Checks if the button is clicked. If it is, plays the button click sound and returns True.
+        args: (Event) event
+        return: (bool) is_clicked
+        """
         is_clicked = False
         if self.hovered and event.type == pygame.MOUSEBUTTONDOWN:
             is_clicked = True
+            BUTTON_CHANNEL.play(SOUNDS.button_click_sound, 0)
         return is_clicked
         
-    def draw_button(self, screen, box_color):
-        self.draw_textbox(screen, self.color, box_color)
+    def draw_button(self, screen, boxed = False, box_color = "black"):
+        """
+        Draws the Button.
+        args: (Surface) screen: Surface to be drawn on, (color) box_color
+        """
+        self.draw_textbox(screen, self.color, boxed, box_color)
     
-    def update(self, screen, box_color):
+    def update(self, screen, boxed = False, box_color = "black"):
         self.set_hovered()
-        self.draw_button(screen, box_color)
-        if self.hovered:
-            self.was_unhovered = False
+        self.draw_button(screen, boxed, box_color)

@@ -2,18 +2,18 @@ import pygame
 
 pygame.init()
 
+BUTTON_CHANNEL = pygame.mixer.Channel(0)
 MUSIC_CHANNEL = pygame.mixer.Channel(1)
-BUTTON_CLICK_CHANNEL = pygame.mixer.Channel(2)
+SHIP_CHANNEL = pygame.mixer.Channel(2)
 GAME_SFX_CHANNEL = pygame.mixer.Channel(3)
 GAME_OVER_SFX_CHANNEL = pygame.mixer.Channel(4)
 
 class Sound:
-    
     def __init__(self):
         """
-        
-        
-        
+        Creates a library of named sounds and channels to draw from.
+        args: None
+        return: None
         """
         self.sfx_on = True
         self.music_on = True
@@ -28,31 +28,30 @@ class Sound:
         self.game_music = pygame.mixer.Sound("assets/game_music.mp3")
         self.options_music = pygame.mixer.Sound("assets/options_music.mp3")
 
-        self.sfx_channels = [BUTTON_CLICK_CHANNEL, GAME_SFX_CHANNEL, GAME_OVER_SFX_CHANNEL]
+        #group all sfx channels into a list
+        self.sfx_channels = [BUTTON_CHANNEL, GAME_SFX_CHANNEL, GAME_OVER_SFX_CHANNEL, SHIP_CHANNEL]
         
-
     def toggle_sfx(self):
+        """
+        Toggles the state of the SFX channels.
+        args: None
+        return: None
+        """
         self.sfx_on = not self.sfx_on
         
         for channel in self.sfx_channels:
             if not self.sfx_on:
                 channel.set_volume(0)
                 channel.stop()
-            # self.move_sound.set_volume(1)
-            # self.collision_sound.set_volume(1)
-            # self.game_over_sound.set_volume(1)
-            # self.button_hover_sound.set_volume(1)
-            # self.button_click_sound.set_volume(1)
-        
             else:
                 channel.set_volume(1)
-            # self.move_sound.set_volume(0)
-            # self.collision_sound.set_volume(0)
-            # self.game_over_sound.set_volume(0)
-            # self.button_hover_sound.set_volume(1)
-            # self.button_click_sound.set_volume(1)
 
     def toggle_music(self):
+        """
+        Toggles the state of the MUSIC channels.
+        args: None
+        return: None
+        """
         self.music_on = not self.music_on
         if not self.music_on:
             MUSIC_CHANNEL.set_volume(0)

@@ -1,6 +1,3 @@
-
-:warning: Everything between << >> needs to be replaced (remove << >> after replacing)
-
 # Space Rock
 ## CS110 Final Project  << Fall, 2024 >>
 
@@ -20,11 +17,17 @@ My project consists of a ship sprite which is controlled by the player, with the
 
 ### Initial Design
 
-![initial gui](assets/gui.jpg)
+![initial gui](assets/gui/gui.jpg)
 
 ### Final Design
 
-![final gui](assets/finalgui.jpg)
+![final gui](assets/gui/finalgui1.jpg)
+![final gui](assets/gui/finalgui2.jpg)
+![final gui](assets/gui/finalgui3.jpg)
+![final gui](assets/gui/finalgui4.jpg)
+![final gui](assets/gui/finalgui5.jpg)
+![final gui](assets/gui/finalgui6.jpg)
+![final gui](assets/gui/finalgui7.jpg)
 
 ## Program Design
 
