@@ -44,7 +44,7 @@ class Button(Textbox):
     def draw_button(self, screen, boxed = False, box_color = "black"):
         """
         Draws the Button.
-        args: (Surface) screen: Surface to be drawn on, (color) box_color
+        args: (Surface) screen: Surface to be drawn on, (bool) boxed, (color) box_color
         """
         self.draw_textbox(screen, self.color, boxed, box_color)
     

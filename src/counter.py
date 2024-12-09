@@ -5,7 +5,8 @@ from src.mytime import Time
 class Counter(Textbox):
     def __init__(self, x, y, text, type):
         """
-        Creates a modified version of a Textbox which contains a  
+        Creates a modified version of a Textbox which contains a Time() object and manages the score.
+        args: (int) x, (int) y, (str) text, (str) type
         """
         super().__init__(x, y, text)
         self.time = Time()
@@ -16,8 +17,8 @@ class Counter(Textbox):
 
     def draw_counter(self, screen, text_color="white", boxed = False, box_color="Black"):
         """
-        Draws the counter on the inputted screen with optional parameters for text and background colors.
-        args: (Surface) screen, (color) text_color, (color) box_color
+        Draws the counter on the inputted screen with optional parameters for text color, background box and background color.
+        args: (Surface) screen, (color) text_color, (bool) boxed, (color) box_color
         return: None
         """
         self.draw_textbox(screen, text_color, boxed, box_color)

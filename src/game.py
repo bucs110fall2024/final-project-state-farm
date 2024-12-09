@@ -36,7 +36,7 @@ GAME_BACKGROUND = pygame.image.load("assets/game_background.png")
 DISPLAY_ICON = pygame.image.load("assets/display_icon.png")
 
 SOUNDS = Sound()
-clock = pygame.time.Clock()
+CLOCK = pygame.time.Clock()
 
 class Game:
     def __init__(self):
@@ -391,7 +391,7 @@ class Game:
 
             #update game
             pygame.display.update()
-            clock.tick(FRAME_RATE)
+            CLOCK.tick(FRAME_RATE)
 
     def optionsloop(self):
         """

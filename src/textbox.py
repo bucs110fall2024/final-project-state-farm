@@ -56,7 +56,7 @@ class Textbox(pygame.sprite.Sprite):
     def draw_textbox(self, screen, text_color = "white", boxed = False, box_color = "black"):
             """
             Draws a textbox.
-            args: (Surface) screen, (str) text, (color) text_color, (color) box_color, (bool) boxed)
+            args: (Surface) screen, (str) text, (color) text_color, (bool) boxed, (color) box_color)
             return: None
             """
             self.set_text_color(text_color)
